@@ -1,113 +1,101 @@
-from typing import List, Dict, Tuple
+"""
+Validation module for task management system.
+Contains functions to validate user input for task details.
+"""
 
-try:
-    from .validation import validate_task_data
-except (ImportError, ModuleNotFoundError):
-    from validation import validate_task_data
+from datetime import datetime
+from typing import Tuple
 
-# Global list to store tasks
-tasks: List[Dict[str, object]] = []
+def validate_task_title(title: str) -> None:
+    """
+    Validate the task title.
+    
+    Args:
+        title (str): The task title to validate
+        
+    Raises:
+        ValueError: If the title is invalid
+    """
+    if not title or not isinstance(title, str):
+        raise ValueError("Task title cannot be empty.")
+    
+    title = title.strip()
+    if len(title) == 0:
+        raise ValueError("Task title cannot be empty or just whitespace.")
+    
+    if len(title) > 100:
+        raise ValueError("Task title must be 100 characters or less.")
 
+def validate_task_description(description: str) -> None:
+    """
+    Validate the task description.
+    
+    Args:
+        description (str): The task description to validate
+        
+    Raises:
+        ValueError: If the description is invalid
+    """
+    if description is None:
+        return  # Description is optional
+    
+    if not isinstance(description, str):
+        raise ValueError("Description must be text.")
+    
+    description = description.strip()
+    
+    if len(description) > 500:
+        raise ValueError("Task description must be 500 characters or less.")
 
-def add_task(title: str, description: str, due_date: str) -> Tuple[bool, str, Dict[str, object] | None]:
+def validate_due_date(due_date: str) -> None:
+    """
+    Validate the due date format.
+    
+    Args:
+        due_date (str): The due date to validate in YYYY-MM-DD format
+        
+    Raises:
+        ValueError: If the due date is invalid
+    """
+    if not due_date or not isinstance(due_date, str):
+        raise ValueError("Due date cannot be empty.")
+    
+    due_date = due_date.strip()
+    
+    # Check format
     try:
-        validate_task_data(title, description, due_date)
-    except ValueError as error:
-        return False, f"Validation failed: {error}", None
+        datetime.strptime(due_date, "%Y-%m-%d")
+    except ValueError:
+        raise ValueError("Invalid date format. Please use YYYY-MM-DD format (e.g., 2024-12-31).")
 
-    task = {
-        "title": title.strip(),
-        "description": description.strip() if description else "",
-        "due_date": due_date.strip(),
-        "completed": False,
-    }
-    tasks.append(task)
-    return True, f"Task '{task['title']}' added successfully!", task
-
-
-def mark_task_as_complete(task_title: str) -> Tuple[bool, str]:
-    if not isinstance(task_title, str) or len(task_title.strip()) == 0:
-        return False, "Task title cannot be empty."
-
-    normalized = task_title.strip().lower()
-    for task in tasks:
-        if task["title"].lower() == normalized:
-            if task["completed"]:
-                return False, f"Task '{task_title.strip()}' is already marked as complete."
-            task["completed"] = True
-            return True, f"Task '{task_title.strip()}' marked as complete!"
-
-    return False, f"Task '{task_title.strip()}' not found."
-
-
-def view_pending_tasks() -> List[Dict[str, object]]:
-    pending_tasks = [task for task in tasks if not task["completed"]]
-    if not pending_tasks:
-        print("\n" + "=" * 50)
-        print("No pending tasks found!")
-        print("=" * 50)
-        return pending_tasks
-
-    print("\n" + "=" * 50)
-    print(f"PENDING TASKS ({len(pending_tasks)})")
-    print("=" * 50)
-    for idx, task in enumerate(pending_tasks, 1):
-        print(f"\n{idx}. Title: {task['title']}")
-        description = task['description'] or "(No description provided)"
-        print(f"   Description: {description}")
-        print(f"   Due Date: {task['due_date']}")
-        print(f"   Status: {'✓ Complete' if task['completed'] else '○ Pending'}")
-        print("-" * 50)
-    return pending_tasks
-
-
-def calculate_progress(task_list=None) -> float:
-    if task_list is None:
-        task_list = tasks
-
-    total_tasks = len(task_list)
-    if total_tasks == 0:
-        return 0.0
-    completed_tasks = sum(1 for task in task_list if task["completed"])
-    return (completed_tasks / total_tasks) * 100
-
-
-def display_progress() -> None:
-    total = len(tasks)
-    completed = sum(1 for task in tasks if task["completed"])
-    percentage = calculate_progress()
-
-    print("\n" + "=" * 50)
-    print("PROGRESS REPORT")
-    print("=" * 50)
-    print(f"Total Tasks: {total}")
-    print(f"Completed Tasks: {completed}")
-    print(f"Progress: {percentage:.1f}%")
-
-    if total > 0:
-        bar_length = 30
-        filled_length = int(bar_length * percentage / 100)
-        bar = "█" * filled_length + "░" * (bar_length - filled_length)
-        print(f"Progress Bar: [{bar}]")
-
-    if total == 0:
-        print("No tasks added yet.")
-    elif completed == total:
-        print("Excellent! All tasks completed!")
-    elif percentage >= 70:
-        print("Good progress! Keep going.")
-    elif percentage > 0:
-        print("Making progress.")
-    else:
-        print("No tasks completed yet. Keep going!")
-
-    print("=" * 50)
-
-
-def get_all_tasks() -> List[Dict[str, object]]:
-    return tasks.copy()
-
-
-def clear_all_tasks() -> None:
-    global tasks
-    tasks = []
+def validate_task_data(title: str, description: str, due_date: str) -> None:
+    """
+    Validate all task data at once.
+    
+    Args:
+        title (str): Task title
+        description (str): Task description
+        due_date (str): Task due date
+        
+    Raises:
+        ValueError: If any validation fails, with combined error messages
+    """
+    errors = []
+    
+    try:
+        validate_task_title(title)
+    except ValueError as e:
+        errors.append(str(e))
+    
+    try:
+        validate_task_description(description)
+    except ValueError as e:
+        errors.append(str(e))
+    
+    try:
+        validate_due_date(due_date)
+    except ValueError as e:
+        errors.append(str(e))
+    
+    if errors:
+        raise ValueError("; ".join(errors))
