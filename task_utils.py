@@ -1,6 +1,9 @@
 from typing import List, Dict, Tuple
 
-from validation import validate_task_data
+try:
+    from .validation import validate_task_data
+except (ImportError, ModuleNotFoundError):
+    from validation import validate_task_data
 
 # Global list to store tasks
 tasks: List[Dict[str, object]] = []
@@ -58,11 +61,14 @@ def view_pending_tasks() -> List[Dict[str, object]]:
     return pending_tasks
 
 
-def calculate_progress() -> float:
-    total_tasks = len(tasks)
+def calculate_progress(task_list=None) -> float:
+    if task_list is None:
+        task_list = tasks
+
+    total_tasks = len(task_list)
     if total_tasks == 0:
         return 0.0
-    completed_tasks = sum(1 for task in tasks if task["completed"])
+    completed_tasks = sum(1 for task in task_list if task["completed"])
     return (completed_tasks / total_tasks) * 100
 
 

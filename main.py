@@ -4,8 +4,18 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT_DIR))
 
-from task_utils import add_task, mark_task_as_complete, view_pending_tasks, display_progress, get_all_tasks
-from validation import validate_task_title, validate_task_description, validate_due_date
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT_DIR))
+
+try:
+    from task_manager.task_utils import add_task, mark_task_as_complete, view_pending_tasks, display_progress, get_all_tasks
+    from task_manager.validation import validate_task_title, validate_task_description, validate_due_date
+except ModuleNotFoundError:
+    from task_utils import add_task, mark_task_as_complete, view_pending_tasks, display_progress, get_all_tasks
+    from validation import validate_task_title, validate_task_description, validate_due_date
 
 
 def display_menu():
@@ -116,13 +126,12 @@ def main():
     print("\nWelcome to the Task Management System!")
     print("This system helps you organize and track your tasks.")
 
-    run_tests = input("\nWould you like to run test scenarios? (y/n): ").lower().strip()
-    if run_tests == 'y':
-        run_test_scenarios()
-
     while True:
         display_menu()
-        choice = input("\nEnter your choice (1-6): ").strip()
+        try:
+            choice = input("\nEnter your choice (1-6): ").strip()
+        except EOFError:
+            break
         if choice == '1':
             add_new_task()
         elif choice == '2':
@@ -141,7 +150,6 @@ def main():
             break
         else:
             print("\nInvalid choice! Please enter a number between 1 and 6.")
-        input("\nPress Enter to continue...")
 
 
 if __name__ == "__main__":
