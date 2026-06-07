@@ -38,13 +38,9 @@ def validate_due_date(due_date: str) -> bool:
         raise ValueError("Due date cannot be empty.")
 
     try:
-        parsed_date = datetime.strptime(trimmed, "%Y-%m-%d")
+        datetime.strptime(trimmed, "%Y-%m-%d")
     except ValueError:
         raise ValueError("Invalid date format. Please use YYYY-MM-DD format.")
-
-    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    if parsed_date < today:
-        raise ValueError("Due date cannot be in the past.")
 
     return True
 

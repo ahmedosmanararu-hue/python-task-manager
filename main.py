@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT_DIR))
+
 from task_utils import add_task, mark_task_as_complete, view_pending_tasks, display_progress, get_all_tasks
 from validation import validate_task_title, validate_task_description, validate_due_date
 
